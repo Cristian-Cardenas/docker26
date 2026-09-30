@@ -13,6 +13,9 @@ jobs:
       - name: Descargar el código del repositorio
         uses: actions/checkout@v7
 
+      - name: Preparar las variables de entorno
+        run: cp .env.example .env
+
       - name: Validar la sintaxis de docker-compose.yml
         run: docker compose config --quiet
 
@@ -34,6 +37,9 @@ jobs:
           tags: api-app:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Preparar las variables de entorno
+        run: cp .env.example .env
 
       - name: Levantar la API y la base de datos
         run: |
