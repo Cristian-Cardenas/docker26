@@ -1,0 +1,52 @@
+name: Verificación
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  validar-compose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código del repositorio
+        uses: actions/checkout@v7
+
+      - name: Validar la sintaxis de docker-compose.yml
+        run: docker compose config --quiet
+
+  construir-y-probar:
+    runs-on: ubuntu-latest
+    needs: validar-compose
+    steps:
+      - name: Descargar el código del repositorio
+        uses: actions/checkout@v7
+
+      - name: Preparar Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Construir la imagen de la API
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          tags: api-app:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Levantar la API y la base de datos
+        run: |
+          docker compose up -d --build
+          docker compose ps
+
+      - name: Esperar a que los servicios estén sanos
+        run: |
+          timeout 60 bash -c 'until curl -sf http://localhost:8080/health; do sleep 2; done'
+          curl -fsS http://localhost:8080/health
+
+      - name: Comprobar el endpoint /db
+        run: curl -fsS http://localhost:8080/db
+
+      - name: Bajar los servicios
+        run: docker compose down --volumes
