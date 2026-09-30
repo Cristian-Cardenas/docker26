@@ -1,4 +1,4 @@
-# Cristian Camilo Cardenas Carvajal
+# .Cristian Camilo Cardenas Carvajal.
 
 Se montó una app de 3 piezas (API FastAPI, PostgreSQL, Nginx-proxy) en contenedores Docker con Dockerfile multi-etapa, orquestadas con docker-compose.yml en red interna más volumen persistente. Se crearon 2 actions que se ejecutan en cada PR/push a main:
 
